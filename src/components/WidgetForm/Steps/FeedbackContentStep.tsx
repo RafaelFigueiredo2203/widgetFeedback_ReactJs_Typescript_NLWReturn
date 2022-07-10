@@ -1,7 +1,10 @@
 import { ArrowLeft, Camera } from "phosphor-react";
 import { FormEvent, useState } from "react";
 import { FeedbackType, feedbackTypes } from "..";
+import  {api}  from "../../../lib/api";
+
 import { CloseButton } from "../../CloseButton";
+import { Loading } from "../../Loading";
 import { ScreenShotButton } from "../ScreenShotButton";
 
 
@@ -20,13 +23,21 @@ export function FeedbackContentStep({onFeedbackSent, feedbackType, onFeedbackRes
 
   const [comment, setComment] = useState('');
 
-  function handleSubmitFeedback(event: FormEvent){
+  const [isSendingFeedback, setIsSendingFeedback] = useState(false);
+
+ async function handleSubmitFeedback(event: FormEvent){
     event.preventDefault();
 
-    console.log({
-      screenshot,
+    setIsSendingFeedback(true);
+
+    await api.post('/feedbacks', {
+      type:feedbackType,
       comment,
-    })
+      screenshot,
+    });
+
+    setIsSendingFeedback(false);
+
     onFeedbackSent();
   }
 
@@ -64,9 +75,9 @@ export function FeedbackContentStep({onFeedbackSent, feedbackType, onFeedbackRes
           onScreenshotTook={setScreenshot}
         />
 
-        <button type="submit" disabled={comment.length ===  0 } className="p-2 bg-brand-500 rounded-md border-transparent flex-1 flex justify-center items-center text-sm hover:bg-brand-300  focus:outline-none  focus:ring-2  focus:ring-offset-2  focus:ring-offset-zinc-900 focus:ring-brand-500 transition-colors disabled:opacity-50 disabled:hover:bg-brand-500"   >
-          Enviar feedback
-        </button>
+        <button type="submit" disabled={comment.length ===  0 || isSendingFeedback } className="p-2 bg-brand-500 rounded-md border-transparent flex-1 flex justify-center items-center text-sm hover:bg-brand-300  focus:outline-none  focus:ring-2  focus:ring-offset-2  focus:ring-offset-zinc-900 focus:ring-brand-500 transition-colors disabled:opacity-50 disabled:hover:bg-brand-500"   >
+            {isSendingFeedback ? <Loading/> : 'Enviar Feedback'}
+       </button>
       </footer>
 </form>
 </>
